@@ -27,8 +27,18 @@ class RevenueRecognition(val connection: Connection) {
         return result
     }
 
+    fun recognizedRevenue2(contractId: Long, asOf: LocalDate): BigDecimal {
+        val resultSet = compute("sum(amount)", "contract = $contractId AND recognizedOn <= '${asOf.format(DateTimeFormatter.ISO_LOCAL_DATE)}'")
+        return resultSet.getBigDecimal(1)
+    }
+
     private fun select(condition: String): ResultSet {
         val prepareStatement = connection.prepareStatement("SELECT * from revenueRecognitions WHERE $condition")
         return prepareStatement.executeQuery()
+    }
+
+    private fun compute(computeExpression: String, condition: String): ResultSet {
+        val prepareStatement = connection.prepareStatement("SELECT $computeExpression from revenueRecognitions WHERE $condition")
+        return requireNotNull(prepareStatement.executeQuery().takeIf { it.next() }) { "Cannot compute $computeExpression on table revenueRecognitions for data $condition" }
     }
 }

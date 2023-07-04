@@ -70,4 +70,21 @@ class ContractTest {
         revenueRecognition.recognizedRevenue(contractId, LocalDate.of(2023, 6, 1).plusDays(30)) shouldBe 200.toBigDecimal()
         revenueRecognition.recognizedRevenue(contractId, LocalDate.of(2023, 6, 1).plusDays(60)) shouldBe 300.toBigDecimal()
     }
+
+    @Test
+    internal fun calculateRecognitions2ForDatabase() {
+        val contract = Contract(connection)
+        val product = Product(connection)
+        val revenueRecognition = RevenueRecognition(connection)
+        val productId = product.insertProduct("Thinking Database", Product.Companion.ProductType.DB)
+        val contractId = contract.insertContract(productId, 300.toBigDecimal(), LocalDate.of(2023, 6, 1))
+
+        // when
+        contract.calculateRecognitions(contractId)
+
+        // then
+        revenueRecognition.recognizedRevenue2(contractId, LocalDate.of(2023, 6, 1)) shouldBe 100.toBigDecimal()
+        revenueRecognition.recognizedRevenue2(contractId, LocalDate.of(2023, 6, 1).plusDays(30)) shouldBe 200.toBigDecimal()
+        revenueRecognition.recognizedRevenue2(contractId, LocalDate.of(2023, 6, 1).plusDays(60)) shouldBe 300.toBigDecimal()
+    }
 }
